@@ -41,12 +41,12 @@ resource "linode_instance" "prometheus" {
   }
 
   provisioner "file" {
-    source      = "install-helpers.sh"
+    source      = "./scripts/install-helpers.sh"
     destination = "/tmp/install-helpers.sh"
   }
 
   provisioner "file" {
-    source      = "prom-installer.sh"
+    source      = "./scripts/prom-installer.sh"
     destination = "/tmp/prom-installer.sh"
   }
 
@@ -57,27 +57,27 @@ resource "linode_instance" "prometheus" {
   }
 
   provisioner "file" {
-    source      = "prometheus.yml"
+    source      = "./configs/prometheus.yml"
     destination = "/etc/prometheus/prometheus.yml"
   }  
 
   provisioner "file" {
-    source      = "prometheus.service"
+    source      = "./configs/prometheus.service"
     destination = "/etc/systemd/system/prometheus.service"
   }
 
   provisioner "file" {
-    source      = "prometheus-node-exporter.service"
+    source      = "./configs/prometheus-node-exporter.service"
     destination = "/etc/systemd/system/prometheus-node-exporter.service"
   }
 
   provisioner "file" {
-    source      = "prometheus.conf"
-    destination = "/tmp/prometheus.conf"
+    source      = "./configs/prometheus-nginx.conf"
+    destination = "/tmp/prometheus-nginx.conf"
   }
 
   provisioner "file" {
-    source      = "configure-ssl.sh"
+    source      = "./scripts/configure-ssl.sh"
     destination = "/tmp/configure-ssl.sh"
   }
 

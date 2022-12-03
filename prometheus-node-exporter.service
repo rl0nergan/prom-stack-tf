@@ -1,9 +1,0 @@
-[Unit]
-Description=Prometheus-node-exporter service.
-
-[Service]
-Type=exec
-ExecStart=/opt/node_exporter-1.5.0.linux-amd64/node_exporter
-
-[Install]
-WantedBy=multi-user.target
