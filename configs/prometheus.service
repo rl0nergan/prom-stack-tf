@@ -1,0 +1,9 @@
+[Unit]
+Description=Prometheus service.
+
+[Service]
+Type=exec
+ExecStart=/opt/prometheus-2.37.4.linux-amd64/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target
