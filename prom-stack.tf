@@ -40,16 +40,6 @@ resource "linode_instance" "prometheus" {
     "disable_root" : "No"
   }
 
-  provisioner "file" {
-    source      = "./scripts/install-helpers.sh"
-    destination = "/tmp/install-helpers.sh"
-  }
-
-  provisioner "file" {
-    source      = "./scripts/prom-installer.sh"
-    destination = "/tmp/prom-installer.sh"
-  }
-
   provisioner "remote-exec" {
     inline = [
       "mkdir /etc/prometheus"
@@ -76,10 +66,10 @@ resource "linode_instance" "prometheus" {
     destination = "/tmp/prometheus-nginx.conf"
   }
 
-  provisioner "file" {
-    source      = "./scripts/configure-ssl.sh"
-    destination = "/tmp/configure-ssl.sh"
-  }
+  # provisioner "file" {
+  #   source      = "./scripts/configure-ssl.sh"
+  #   destination = "/tmp/configure-ssl.sh"
+  # }
 
   connection {
     type     = "ssh"
@@ -88,17 +78,18 @@ resource "linode_instance" "prometheus" {
     host     = self.ip_address
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/prom-installer.sh",
-      "/tmp/prom-installer.sh"
-    ]
-  }
+}
+
+resource "linode_volume" "prom-data" {
+    label = "prom-data"
+    region = linode_instance.prometheus.region
+    linode_id = linode_instance.prometheus.id
+    size = 50
 }
 
 resource "linode_domain_record" "prometheus-A" {
   domain_id   = 1395459
-  name        = "prom-test"
+  name        = "prom"
   record_type = "A"
   target      = linode_instance.prometheus.ip_address
   ttl_sec     = 30
@@ -106,27 +97,45 @@ resource "linode_domain_record" "prometheus-A" {
 
 # resource "linode_domain_record" "prometheus-AAAA" {
 #     domain_id = 1395459
-#     name = "prom-test"
+#     name = "prom"
 #     record_type = "AAAA"
 #     target = linode_instance.prometheus.ipv6
 #     ttl_sec = 30
 # }
 
-resource "null_resource" "configure_ssl" {
+resource "null_resource" "configure_prometheus" {
   connection {
     type     = "ssh"
     user     = "root"
     password = var.root_password
     host     = linode_instance.prometheus.ip_address
   }
+  provisioner "file" {
+    source      = "./scripts/install-helpers.sh"
+    destination = "/tmp/install-helpers.sh"
+  }
+
+  provisioner "file" {
+    source      = "./scripts/prom-installer.sh"
+    destination = "/tmp/prom-installer.sh"
+  }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/configure-ssl.sh",
-      "/tmp/configure-ssl.sh 'prom-test.jnkyrd.dog' 'ryan.tlonergan@gmail.com'"
+      "chmod +x /tmp/prom-installer.sh",
+      "/tmp/prom-installer.sh ${linode_volume.prom-data.label}"
     ]
   }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/configure-ssl.sh",
+  #     "/tmp/configure-ssl.sh 'prom.jnkyrd.dog' 'ryan.tlonergan@gmail.com'"
+  #   ]
+  # }
 }
+
+
 
 
 # Will use the file and remote-exec 
@@ -172,13 +181,6 @@ resource "null_resource" "configure_ssl" {
 #         stackscript_data = {
 #           "disable_root": "No"
 #         }
-# }
-
-# resource "linode_volume" "prom-data" {
-#     label = "prom-data"
-#     region = linode_instance.prometheus.region
-#     linode_id = linode_instance.prometheus.id
-#     size = 50
 # }
 
 # data "linode_object_storage_cluster" "primary" {

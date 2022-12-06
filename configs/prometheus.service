@@ -3,7 +3,7 @@ Description=Prometheus service.
 
 [Service]
 Type=exec
-ExecStart=/opt/prometheus-2.37.4.linux-amd64/prometheus --config.file=/etc/prometheus/prometheus.yml
+ExecStart=/opt/prometheus-2.40.5.linux-amd64/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path="/var/lib/prometheus" --storage.tsdb.min-block-duration=2h --storage.tsdb.max-block-duration=2h
 
 [Install]
 WantedBy=multi-user.target
